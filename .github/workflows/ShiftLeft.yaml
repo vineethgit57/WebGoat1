@@ -11,21 +11,19 @@ on:
 jobs:
   scanning:
     env:
-      APP_ID: 5727eddfdf55d5ec064019a8797e625b0f77023aaac30ec45ef85a828b54700d
+      APP_ID: 527aa7ba1f0ce8d2b6f9184fa68e885b4408f7bafcd36193ada3a3c816ea3169
       BRANCH_NAME: main
-      SCAN_ID: 1b31c5324fcfac2a87c443eacebf055456db84c7e720f196ae304ad625d1e6fd
-      REQ_URL_MAP: "${{toJSON('{\"SL_RESULT_API_HOST\":\"https://slresultapi.qa.securin.io/resultapi\"\
-        ,\"SL_RESULTPARSER_API_HOST\":\"https://slresultparserapi.qa.securin.io/resultparserapi\"\
+      SCAN_ID: 55d4f00ccd7f2280188f3fb6114fa5bc9002c47dc3bcfe5a189eead3ad68fa8d
+      REQ_URL_MAP: "${{toJSON('{\"SL_RESULT_API_HOST\":\"http://038a-183-82-205-140.ngrok.io/resultapi\"\
+        ,\"SL_RESULTPARSER_API_HOST\":\"http://6a1a-183-82-205-140.ngrok.io/resultparserapi\"\
         }')}}"
     steps:
     - name: Retrieve Token Info
       id: auth_token
-      run: "respJson=$(curl --location --request GET 'https://slresultapi.qa.securin.io/resultapi/aws/ecr/token'\
+      run: "respJson=$(curl --location --request GET 'http://038a-183-82-205-140.ngrok.io/resultapi/aws/ecr/token'\
         \  --header 'Authorization: Bearer ${{secrets.CLI_ACCESS_TOKEN}}'  --data-raw\
         \ ' ' )\necho \"::set-output name=authTokenJson::$respJson\""
     - uses: actions/checkout@v2
-    - name: Build with Maven
-      run: mvn -q --batch-mode --update-snapshots verify
     - name: Scan Initiated
       id: sec_scan_init
       run: "usrVal=$(echo '${{fromJson(steps.auth_token.outputs.authTokenJson).user}}'\
@@ -41,8 +39,8 @@ jobs:
         \ --volume ${{github.workspace}}:/workdir -v /var/run/docker.sock:/var/run/docker.sock\
         \ $usrImgTag -access_tkn ${{secrets.CLI_ACCESS_TOKEN}} -app_id ${{ env.APP_ID\
         \ }} -scan_id ${{ env.SCAN_ID }} -branch_name ${{ env.BRANCH_NAME }} -req_url_map\
-        \ ${{ env.REQ_URL_MAP }} event:${{ github.event_name }}  pr_number:${{ github.event.number\
-        \ }}"
+        \ ${{ env.REQ_URL_MAP }} -tool_name github event:${{ github.event_name }}\
+        \  pr_number:${{ github.event.number }}"
     - name: Upload SARIF file
       uses: github/codeql-action/upload-sarif@v1
       with:
