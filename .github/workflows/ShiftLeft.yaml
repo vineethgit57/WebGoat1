@@ -23,7 +23,7 @@ jobs:
       run: "respJson=$(curl --location --request GET 'http://b3ff-183-82-205-140.ngrok.io/resultapi/aws/ecr/token'\
         \  --header 'Authorization: Bearer ${{secrets.CLI_ACCESS_TOKEN}}'  --data-raw\
         \ ' ' )\necho \"::set-output name=authTokenJson::$respJson\""
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3.1.0
     - name: Scan Initiated
       id: sec_scan_init
       run: "usrVal=$(echo '${{fromJson(steps.auth_token.outputs.authTokenJson).user}}'\
